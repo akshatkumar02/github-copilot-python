@@ -1,6 +1,7 @@
 // Client-side rendering and interaction for the Flask-backed Sudoku
 const SIZE = 9;
 let puzzle = [];
+let solution = [];
 
 function createBoardElement() {
   const boardDiv = document.getElementById('sudoku-board');
@@ -18,6 +19,10 @@ function createBoardElement() {
       input.addEventListener('input', (e) => {
         const val = e.target.value.replace(/[^1-9]/g, '');
         e.target.value = val;
+        e.target.classList.toggle(
+          'incorrect',
+          val !== '' && Number(val) !== solution[i][j],
+        );
       });
       rowDiv.appendChild(input);
     }
@@ -25,8 +30,9 @@ function createBoardElement() {
   }
 }
 
-function renderPuzzle(puz) {
+function renderPuzzle(puz, sol) {
   puzzle = puz;
+  solution = sol;
   createBoardElement();
   const boardDiv = document.getElementById('sudoku-board');
   const inputs = boardDiv.getElementsByTagName('input');
@@ -38,10 +44,11 @@ function renderPuzzle(puz) {
       if (val !== 0) {
         inp.value = val;
         inp.disabled = true;
-        inp.className += ' prefilled';
+        inp.classList.add('prefilled');
       } else {
         inp.value = '';
         inp.disabled = false;
+        inp.classList.remove('incorrect');
       }
     }
   }
@@ -55,7 +62,7 @@ async function newGame() {
     document.getElementById('message').innerText = data.error;
     return;
   }
-  renderPuzzle(data.puzzle);
+  renderPuzzle(data.puzzle, data.solution);
   document.getElementById('message').innerText = '';
 }
 

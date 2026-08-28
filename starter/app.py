@@ -23,7 +23,7 @@ def new_game():
             CURRENT['puzzle'] = puzzle
             CURRENT['solution'] = solution
             CURRENT.pop('difficulty', None)
-            return jsonify({'puzzle': puzzle})
+            return jsonify({'puzzle': puzzle, 'solution': solution})
         difficulty = sudoku_logic.DEFAULT_DIFFICULTY
     if difficulty not in sudoku_logic.DIFFICULTY_CLUES:
         return jsonify({'error': 'Invalid difficulty'}), 400
@@ -32,7 +32,7 @@ def new_game():
     CURRENT['puzzle'] = puzzle
     CURRENT['solution'] = solution
     CURRENT['difficulty'] = difficulty
-    return jsonify({'puzzle': puzzle, 'difficulty': difficulty})
+    return jsonify({'puzzle': puzzle, 'solution': solution, 'difficulty': difficulty})
 
 @app.route('/check', methods=['POST'])
 def check_solution():

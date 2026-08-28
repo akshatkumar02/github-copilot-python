@@ -25,7 +25,7 @@ def test_new_game_uses_requested_clues_and_returns_puzzle(client, monkeypatch):
     response = client.get('/new?clues=40')
 
     assert response.status_code == 200
-    assert response.get_json() == {'puzzle': puzzle}
+    assert response.get_json() == {'puzzle': puzzle, 'solution': solution}
     assert received['clues'] == 40
     assert app_module.CURRENT == {'puzzle': puzzle, 'solution': solution}
 
@@ -67,6 +67,7 @@ def test_new_game_accepts_each_difficulty(client, monkeypatch):
         response = client.get(f'/new?difficulty={difficulty}')
         assert response.status_code == 200
         assert response.get_json()['difficulty'] == difficulty
+        assert response.get_json()['solution'] == [[1] * 9 for _ in range(9)]
 
     assert received == ['Easy', 'Medium', 'Hard']
 
