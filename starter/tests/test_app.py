@@ -6,6 +6,7 @@ def test_index_renders_game_controls(client):
 
     assert response.status_code == 200
     assert b'Sudoku Game' in response.data
+    assert b'<select id="difficulty">' in response.data
     assert b'New Game' in response.data
     assert b'Check Solution' in response.data
 
@@ -27,6 +28,54 @@ def test_new_game_uses_requested_clues_and_returns_puzzle(client, monkeypatch):
     assert response.get_json() == {'puzzle': puzzle}
     assert received['clues'] == 40
     assert app_module.CURRENT == {'puzzle': puzzle, 'solution': solution}
+
+
+def test_new_game_defaults_to_medium(client, monkeypatch):
+    received = {}
+
+    def fake_generate_puzzle(difficulty):
+        received['difficulty'] = difficulty
+        return [[0] * 9 for _ in range(9)], [[1] * 9 for _ in range(9)]
+
+    monkeypatch.setattr(
+        app_module.sudoku_logic,
+        'generate_puzzle_for_difficulty',
+        fake_generate_puzzle,
+    )
+
+    response = client.get('/new')
+
+    assert response.status_code == 200
+    assert received['difficulty'] == 'Medium'
+    assert app_module.CURRENT['difficulty'] == 'Medium'
+
+
+def test_new_game_accepts_each_difficulty(client, monkeypatch):
+    received = []
+
+    def fake_generate_puzzle(difficulty):
+        received.append(difficulty)
+        return [[0] * 9 for _ in range(9)], [[1] * 9 for _ in range(9)]
+
+    monkeypatch.setattr(
+        app_module.sudoku_logic,
+        'generate_puzzle_for_difficulty',
+        fake_generate_puzzle,
+    )
+
+    for difficulty in ('Easy', 'Medium', 'Hard'):
+        response = client.get(f'/new?difficulty={difficulty}')
+        assert response.status_code == 200
+        assert response.get_json()['difficulty'] == difficulty
+
+    assert received == ['Easy', 'Medium', 'Hard']
+
+
+def test_new_game_rejects_invalid_difficulty(client):
+    response = client.get('/new?difficulty=Extreme')
+
+    assert response.status_code == 400
+    assert response.get_json() == {'error': 'Invalid difficulty'}
 
 
 def test_check_solution_requires_a_game(client):

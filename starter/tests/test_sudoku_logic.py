@@ -70,6 +70,31 @@ def test_generated_puzzle_has_exactly_one_solution():
     assert sudoku_logic.count_solutions(puzzle) == 1
 
 
+def test_difficulty_levels_have_ordered_unique_clue_counts_and_solutions():
+    clue_counts = {}
+
+    for difficulty in ("Easy", "Medium", "Hard"):
+        random.seed(0)
+        puzzle, _ = sudoku_logic.generate_puzzle_for_difficulty(difficulty)
+        clue_counts[difficulty] = sum(
+            cell != sudoku_logic.EMPTY for row in puzzle for cell in row
+        )
+        assert sudoku_logic.count_solutions(puzzle) == 1
+
+    assert clue_counts == {"Easy": 45, "Medium": 35, "Hard": 25}
+    assert clue_counts["Easy"] > clue_counts["Medium"] > clue_counts["Hard"]
+
+
+def test_generate_puzzle_for_difficulty_rejects_invalid_values():
+    for difficulty in ("", "Extreme", None, 1):
+        try:
+            sudoku_logic.generate_puzzle_for_difficulty(difficulty)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("invalid difficulty was accepted")
+
+
 def test_returned_solution_solves_generated_puzzle():
     random.seed(1)
 

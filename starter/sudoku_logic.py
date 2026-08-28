@@ -4,6 +4,12 @@ import random
 SIZE = 9
 EMPTY = 0
 MIN_UNIQUE_CLUES = 17
+DIFFICULTY_CLUES = {
+    "Easy": 45,
+    "Medium": 35,
+    "Hard": 25,
+}
+DEFAULT_DIFFICULTY = "Medium"
 
 def deep_copy(board):
     return copy.deepcopy(board)
@@ -138,3 +144,10 @@ def generate_puzzle(clues=35):
             return deep_copy(board), solution
 
     raise RuntimeError("Unable to generate a uniquely solvable puzzle")
+
+
+def generate_puzzle_for_difficulty(difficulty=DEFAULT_DIFFICULTY):
+    """Generate a uniquely solvable puzzle for a named difficulty level."""
+    if difficulty not in DIFFICULTY_CLUES:
+        raise ValueError("difficulty must be Easy, Medium, or Hard")
+    return generate_puzzle(clues=DIFFICULTY_CLUES[difficulty])
