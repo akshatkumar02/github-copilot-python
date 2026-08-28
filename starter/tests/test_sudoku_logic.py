@@ -60,3 +60,33 @@ def test_generate_puzzle_returns_solution_and_requested_number_of_clues():
         for row in range(sudoku_logic.SIZE)
         for col in range(sudoku_logic.SIZE)
     )
+
+
+def test_generated_puzzle_has_exactly_one_solution():
+    random.seed(0)
+
+    puzzle, _ = sudoku_logic.generate_puzzle(clues=35)
+
+    assert sudoku_logic.count_solutions(puzzle) == 1
+
+
+def test_returned_solution_solves_generated_puzzle():
+    random.seed(1)
+
+    puzzle, solution = sudoku_logic.generate_puzzle(clues=35)
+
+    assert all(
+        puzzle[row][col] in (sudoku_logic.EMPTY, solution[row][col])
+        for row in range(sudoku_logic.SIZE)
+        for col in range(sudoku_logic.SIZE)
+    )
+    assert sudoku_logic.count_solutions(solution) == 1
+
+
+def test_count_solutions_returns_zero_for_an_invalid_board():
+    board = sudoku_logic.create_empty_board()
+    board[0][0] = 1
+    board[0][1] = 1
+
+    assert sudoku_logic.count_solutions(board) == 0
+    assert sudoku_logic.count_solutions([[10] * 9 for _ in range(9)]) == 0

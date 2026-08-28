@@ -3,6 +3,7 @@ import random
 
 SIZE = 9
 EMPTY = 0
+MIN_UNIQUE_CLUES = 17
 
 def deep_copy(board):
     return copy.deepcopy(board)
@@ -39,6 +40,67 @@ def fill_board(board):
                 return False
     return True
 
+
+def count_solutions(board, limit=2):
+    """Return the number of solutions, stopping once ``limit`` is reached."""
+    if limit < 1:
+        return 0
+    if len(board) != SIZE or any(len(row) != SIZE for row in board):
+        return 0
+    if any(
+        value not in range(0, SIZE + 1)
+        for row in board
+        for value in row
+    ):
+        return 0
+
+    working_board = deep_copy(board)
+
+    for row in range(SIZE):
+        for col in range(SIZE):
+            value = working_board[row][col]
+            if value == EMPTY:
+                continue
+            working_board[row][col] = EMPTY
+            if not is_safe(working_board, row, col, value):
+                return 0
+            working_board[row][col] = value
+
+    def count_from_board():
+        best_cell = None
+        best_candidates = None
+
+        for row in range(SIZE):
+            for col in range(SIZE):
+                if working_board[row][col] != EMPTY:
+                    continue
+
+                candidates = [
+                    value
+                    for value in range(1, SIZE + 1)
+                    if is_safe(working_board, row, col, value)
+                ]
+                if not candidates:
+                    return 0
+                if best_candidates is None or len(candidates) < len(best_candidates):
+                    best_cell = (row, col)
+                    best_candidates = candidates
+
+        if best_cell is None:
+            return 1
+
+        row, col = best_cell
+        solution_count = 0
+        for candidate in best_candidates:
+            working_board[row][col] = candidate
+            solution_count += count_from_board()
+            working_board[row][col] = EMPTY
+            if solution_count >= limit:
+                return limit
+        return solution_count
+
+    return count_from_board()
+
 def remove_cells(board, clues):
     attempts = SIZE * SIZE - clues
     while attempts > 0:
@@ -49,9 +111,30 @@ def remove_cells(board, clues):
             attempts -= 1
 
 def generate_puzzle(clues=35):
-    board = create_empty_board()
-    fill_board(board)
-    solution = deep_copy(board)
-    remove_cells(board, clues)
-    puzzle = deep_copy(board)
-    return puzzle, solution
+    if not isinstance(clues, int) or isinstance(clues, bool):
+        raise ValueError("clues must be an integer")
+    if clues < MIN_UNIQUE_CLUES or clues > SIZE * SIZE:
+        raise ValueError(
+            f"clues must be between {MIN_UNIQUE_CLUES} and {SIZE * SIZE}"
+        )
+
+    for _ in range(100):
+        board = create_empty_board()
+        fill_board(board)
+        solution = deep_copy(board)
+        cells = [(row, col) for row in range(SIZE) for col in range(SIZE)]
+        random.shuffle(cells)
+
+        for row, col in cells:
+            if sum(cell != EMPTY for row in board for cell in row) == clues:
+                return deep_copy(board), solution
+
+            value = board[row][col]
+            board[row][col] = EMPTY
+            if count_solutions(board) != 1:
+                board[row][col] = value
+
+        if sum(cell != EMPTY for row in board for cell in row) == clues:
+            return deep_copy(board), solution
+
+    raise RuntimeError("Unable to generate a uniquely solvable puzzle")
