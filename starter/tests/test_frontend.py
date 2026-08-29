@@ -48,6 +48,21 @@ def test_frontend_stops_timer_when_board_is_solved():
     assert 'clearInterval(timerInterval)' in source
 
 
+def test_frontend_resets_hint_counter_on_new_game():
+    source = MAIN_JS.read_text()
+
+    assert "document.getElementById('hint-count').innerText = 'Hints: 0';" in source
+    assert 'currentGameCompleted = false' in source
+
+
+def test_frontend_blocks_repeat_score_flow_for_solved_game():
+    source = MAIN_JS.read_text()
+
+    assert 'currentGameCompleted = true' in source
+    assert 'if (currentGameCompleted)' in source
+    assert 'if (data.solved)' in source
+
+
 def test_frontend_timer_element_exists_in_page():
     source = (Path(__file__).parents[1] / 'templates' / 'index.html').read_text()
 

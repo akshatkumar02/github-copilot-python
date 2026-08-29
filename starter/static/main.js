@@ -7,6 +7,7 @@ let solution = [];
 let timerInterval = null;
 let startTime = null;
 let currentDifficulty = 'Medium';
+let currentGameCompleted = false;
 
 function formatTime(totalSeconds) {
   const minutes = Math.floor(totalSeconds / 60);
@@ -208,6 +209,8 @@ async function newGame() {
     document.getElementById('message').innerText = data.error;
     return;
   }
+  currentGameCompleted = false;
+  document.getElementById('hint-count').innerText = 'Hints: 0';
   renderPuzzle(data.puzzle, data.solution);
   document.getElementById('message').innerText = '';
   hideScoreEntryForm();
@@ -248,6 +251,10 @@ async function checkSolution() {
     }
   }
   if (data.solved) {
+    if (currentGameCompleted) {
+      return;
+    }
+    currentGameCompleted = true;
     stopTimer();
     msg.style.color = '#388e3c';
     msg.innerText = 'Congratulations! You solved it!';
