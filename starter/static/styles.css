@@ -98,22 +98,6 @@ h1 {
     min-width: 0;
 }
 
-.sudoku-cell:focus,
-.sudoku-cell:focus-visible {
-    background: var(--cell-focus-bg);
-}
-
-.sudoku-cell.prefilled {
-    background: var(--prefilled-bg);
-    font-weight: bold;
-    color: var(--prefilled-text);
-}
-
-.sudoku-cell.incorrect {
-    background: var(--incorrect-bg);
-    color: #fff;
-}
-
 .sudoku-cell:nth-child(3),
 .sudoku-cell:nth-child(6) {
     border-right: 3px solid var(--board-border);
@@ -137,6 +121,22 @@ h1 {
 .sudoku-row:nth-child(n + 4):nth-child(-n + 6) .sudoku-cell:nth-child(n + 7):nth-child(-n + 9),
 .sudoku-row:nth-child(n + 7):nth-child(-n + 9) .sudoku-cell:nth-child(n + 4):nth-child(-n + 6) {
     background: var(--region-dark);
+}
+
+.sudoku-row:nth-child(n) .sudoku-cell:focus,
+.sudoku-row:nth-child(n) .sudoku-cell:focus-visible {
+    background: var(--cell-focus-bg);
+}
+
+.sudoku-row:nth-child(n) .sudoku-cell.prefilled {
+    background: var(--prefilled-bg);
+    font-weight: bold;
+    color: var(--prefilled-text);
+}
+
+.sudoku-row:nth-child(n) .sudoku-cell.incorrect {
+    background: var(--incorrect-bg);
+    color: #fff;
 }
 
 .controls {
