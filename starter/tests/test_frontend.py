@@ -93,3 +93,22 @@ def test_frontend_has_dark_mode_toggle_and_theme_storage():
     assert 'localStorage.setItem(THEME_STORAGE_KEY' in source
     assert 'document.body.dataset.theme' in source
     assert "body[data-theme='dark']" in css
+
+
+def test_frontend_uses_responsive_board_and_wrapping_controls():
+    css = (Path(__file__).parents[1] / 'static' / 'styles.css').read_text()
+
+    assert 'width: min(90vw, 540px);' in css
+    assert 'flex-wrap: wrap;' in css
+    assert '@media (max-width: 640px)' in css
+    assert 'overflow-x: hidden;' in css
+
+
+def test_frontend_uses_css_only_alternating_boxes_for_3x3_regions():
+    css = (Path(__file__).parents[1] / 'static' / 'styles.css').read_text()
+
+    assert '--region-light' in css
+    assert '--region-dark' in css
+    assert '.sudoku-row:nth-child(-n + 3) .sudoku-cell:nth-child(-n + 3)' in css
+    assert '.sudoku-row:nth-child(n + 4):nth-child(-n + 6) .sudoku-cell:nth-child(n + 4):nth-child(-n + 6)' in css
+    assert 'body[data-theme=\'dark\']' in css
