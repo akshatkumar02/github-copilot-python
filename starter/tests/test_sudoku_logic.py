@@ -115,3 +115,61 @@ def test_count_solutions_returns_zero_for_an_invalid_board():
 
     assert sudoku_logic.count_solutions(board) == 0
     assert sudoku_logic.count_solutions([[10] * 9 for _ in range(9)]) == 0
+
+
+def test_get_hint_returns_first_empty_cell_with_correct_value():
+    solution = [[value for value in range(1, 10)] for _ in range(9)]
+    board = [[0] * 9 for _ in range(9)]
+    board[0][0] = 1
+
+    hint = sudoku_logic.get_hint(board, solution)
+
+    assert hint is not None
+    assert hint[0] == 0
+    assert hint[1] == 1
+    assert hint[2] == 2
+
+
+def test_get_hint_returns_none_when_board_is_complete():
+    solution = [[value for value in range(1, 10)] for _ in range(9)]
+    board = [row[:] for row in solution]
+
+    hint = sudoku_logic.get_hint(board, solution)
+
+    assert hint is None
+
+
+def test_get_hint_skips_filled_cells():
+    solution = [[value for value in range(1, 10)] for _ in range(9)]
+    board = [[0] * 9 for _ in range(9)]
+    board[0][0] = 1
+    board[0][1] = 2
+    board[0][2] = 3
+
+    hint = sudoku_logic.get_hint(board, solution)
+
+    assert hint is not None
+    assert hint[0] == 0
+    assert hint[1] == 3
+    assert hint[2] == 4
+
+
+def test_get_hint_works_with_different_puzzle_states():
+    solution = [[1] * 9 for _ in range(9)]
+    solution[5][5] = 5
+
+    # Partially filled board
+    board = [[0] * 9 for _ in range(9)]
+    board[3][3] = 1
+
+    hint = sudoku_logic.get_hint(board, solution)
+
+    assert hint == (0, 0, 1)
+
+    # Update board with hint
+    board[0][0] = 1
+
+    hint2 = sudoku_logic.get_hint(board, solution)
+
+    assert hint2 == (0, 1, 1)
+    assert hint != hint2

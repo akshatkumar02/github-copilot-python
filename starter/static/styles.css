@@ -78,6 +78,12 @@ button:hover {
     background: #1565c0;
 }
 
+#hint-count {
+    margin-left: 20px;
+    font-size: 16px;
+    color: #333;
+}
+
 #message {
     margin-left: 20px;
     font-size: 16px;

@@ -151,3 +151,15 @@ def generate_puzzle_for_difficulty(difficulty=DEFAULT_DIFFICULTY):
     if difficulty not in DIFFICULTY_CLUES:
         raise ValueError("difficulty must be Easy, Medium, or Hard")
     return generate_puzzle(clues=DIFFICULTY_CLUES[difficulty])
+
+
+def get_hint(board, solution):
+    """
+    Find the first empty cell in board and return (row, col, correct_value).
+    Returns None if no empty cells exist.
+    """
+    for row in range(SIZE):
+        for col in range(SIZE):
+            if board[row][col] == EMPTY:
+                return (row, col, solution[row][col])
+    return None

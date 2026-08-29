@@ -27,7 +27,7 @@ def test_new_game_uses_requested_clues_and_returns_puzzle(client, monkeypatch):
     assert response.status_code == 200
     assert response.get_json() == {'puzzle': puzzle, 'solution': solution}
     assert received['clues'] == 40
-    assert app_module.CURRENT == {'puzzle': puzzle, 'solution': solution}
+    assert app_module.CURRENT == {'puzzle': puzzle, 'solution': solution, 'hint_count': 0}
 
 
 def test_new_game_defaults_to_medium(client, monkeypatch):
@@ -165,3 +165,97 @@ def test_check_solution_accepts_a_matching_board(client):
 
     assert response.status_code == 200
     assert response.get_json() == {'incorrect': [], 'solved': True}
+
+
+def test_hint_requires_a_game(client):
+    app_module.CURRENT.update(puzzle=None, solution=None, hint_count=0)
+
+    response = client.post('/hint', json={'board': [[0] * 9 for _ in range(9)]})
+
+    assert response.status_code == 400
+    assert response.get_json() == {'error': 'No game in progress'}
+
+
+def test_hint_finds_first_empty_cell_and_returns_correct_value(client):
+    solution = [[value for value in range(1, 10)] for _ in range(9)]
+    board = [[0] * 9 for _ in range(9)]
+    board[0][0] = 1
+    app_module.CURRENT.update(puzzle=board, solution=solution, hint_count=0)
+
+    response = client.post('/hint', json={'board': board})
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['row'] == 0
+    assert data['col'] == 1
+    assert data['value'] == 2
+
+
+def test_hint_increments_hint_count(client):
+    solution = [[value for value in range(1, 10)] for _ in range(9)]
+    board = [[0] * 9 for _ in range(9)]
+    app_module.CURRENT.update(puzzle=board, solution=solution, hint_count=0)
+
+    response = client.post('/hint', json={'board': board})
+
+    assert response.status_code == 200
+    assert response.get_json()['hint_count'] == 1
+    assert app_module.CURRENT['hint_count'] == 1
+
+
+def test_hint_multiple_calls_return_different_cells(client):
+    solution = [[value for value in range(1, 10)] for _ in range(9)]
+    board = [[0] * 9 for _ in range(9)]
+    app_module.CURRENT.update(puzzle=board, solution=solution, hint_count=0)
+
+    # First hint
+    response1 = client.post('/hint', json={'board': board})
+    data1 = response1.get_json()
+    row1, col1 = data1['row'], data1['col']
+
+    # Update board with first hint
+    board[row1][col1] = data1['value']
+
+    # Second hint
+    response2 = client.post('/hint', json={'board': board})
+    data2 = response2.get_json()
+    row2, col2 = data2['row'], data2['col']
+
+    assert (row1, col1) != (row2, col2)
+    assert data2['hint_count'] == 2
+
+
+def test_hint_returns_error_when_no_empty_cells(client):
+    solution = [[value for value in range(1, 10)] for _ in range(9)]
+    board = [row[:] for row in solution]
+    app_module.CURRENT.update(puzzle=board, solution=solution, hint_count=0)
+
+    response = client.post('/hint', json={'board': board})
+
+    assert response.status_code == 400
+    assert response.get_json() == {'error': 'No empty cells available'}
+
+
+def test_hint_count_resets_on_new_game(client, monkeypatch):
+    received = []
+
+    def fake_generate_puzzle(difficulty):
+        received.append(difficulty)
+        return [[0] * 9 for _ in range(9)], [[1] * 9 for _ in range(9)]
+
+    monkeypatch.setattr(
+        app_module.sudoku_logic,
+        'generate_puzzle_for_difficulty',
+        fake_generate_puzzle,
+    )
+
+    # Start first game
+    client.get('/new?difficulty=Easy')
+    assert app_module.CURRENT['hint_count'] == 0
+
+    # Simulate using a hint
+    app_module.CURRENT['hint_count'] = 3
+
+    # Start second game
+    client.get('/new?difficulty=Medium')
+    assert app_module.CURRENT['hint_count'] == 0
