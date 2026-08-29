@@ -53,3 +53,16 @@ def test_frontend_timer_element_exists_in_page():
 
     assert 'id="timer"' in source
     assert 'Timer:' in source
+
+
+def test_frontend_implements_scoreboard_storage_and_player_name_flow():
+    source = MAIN_JS.read_text()
+
+    assert 'sudokuTopScores' in source
+    assert 'player-name' in source
+    assert 'Save Score' in source
+    assert 'localStorage.getItem' in source
+    assert 'localStorage.setItem' in source
+    assert 'timeSeconds' in source
+    assert 'hintsUsed' in source
+    assert 'slice(0, 10)' in source

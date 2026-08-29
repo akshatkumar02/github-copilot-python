@@ -89,3 +89,55 @@ button:hover {
     font-size: 16px;
     color: #d32f2f;
 }
+
+.score-panel {
+    width: min(420px, 90vw);
+    margin: 20px auto 40px;
+    padding: 18px;
+    background: #fff;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.score-panel h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+#scoreboard-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+#scoreboard-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.score-entry-form {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.score-entry-form label {
+    font-weight: bold;
+    color: #333;
+}
+
+#player-name {
+    padding: 8px 10px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    min-width: 160px;
+}
+
+#save-score {
+    margin: 0;
+}
