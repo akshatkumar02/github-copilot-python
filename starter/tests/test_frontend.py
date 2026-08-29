@@ -28,3 +28,28 @@ def test_frontend_displays_completion_message_for_solved_state():
     assert 'data.solved' in source
     assert "'Congratulations! You solved it!'" in source
     assert "msg.innerText = 'Congratulations! You solved it!'" in source
+
+
+def test_frontend_implements_timer_reset_and_display():
+    source = MAIN_JS.read_text()
+
+    assert 'timerInterval' in source
+    assert 'setInterval' in source
+    assert 'clearInterval(timerInterval)' in source
+    assert 'formatTime' in source
+    assert 'timerEl.innerText' in source
+
+
+def test_frontend_stops_timer_when_board_is_solved():
+    source = MAIN_JS.read_text()
+
+    assert 'if (data.solved)' in source
+    assert 'stopTimer()' in source
+    assert 'clearInterval(timerInterval)' in source
+
+
+def test_frontend_timer_element_exists_in_page():
+    source = (Path(__file__).parents[1] / 'templates' / 'index.html').read_text()
+
+    assert 'id="timer"' in source
+    assert 'Timer:' in source

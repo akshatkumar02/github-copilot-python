@@ -2,6 +2,37 @@
 const SIZE = 9;
 let puzzle = [];
 let solution = [];
+let timerInterval = null;
+let startTime = null;
+
+function formatTime(totalSeconds) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function updateTimerDisplay() {
+  const timerEl = document.getElementById('timer');
+  if (!timerEl) return;
+  const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+  timerEl.innerText = `Timer: ${formatTime(elapsedSeconds)}`;
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function startTimer() {
+  stopTimer();
+  startTime = Date.now();
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    updateTimerDisplay();
+  }, 1000);
+}
 
 function createBoardElement() {
   const boardDiv = document.getElementById('sudoku-board');
@@ -64,6 +95,7 @@ async function newGame() {
   }
   renderPuzzle(data.puzzle, data.solution);
   document.getElementById('message').innerText = '';
+  startTimer();
 }
 
 async function checkSolution() {
@@ -100,6 +132,7 @@ async function checkSolution() {
     }
   }
   if (data.solved) {
+    stopTimer();
     msg.style.color = '#388e3c';
     msg.innerText = 'Congratulations! You solved it!';
     return;
