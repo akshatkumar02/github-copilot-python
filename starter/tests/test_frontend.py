@@ -81,3 +81,15 @@ def test_frontend_implements_scoreboard_storage_and_player_name_flow():
     assert 'timeSeconds' in source
     assert 'hintsUsed' in source
     assert 'slice(0, 10)' in source
+
+
+def test_frontend_has_dark_mode_toggle_and_theme_storage():
+    source = MAIN_JS.read_text()
+    html = (Path(__file__).parents[1] / 'templates' / 'index.html').read_text()
+    css = (Path(__file__).parents[1] / 'static' / 'styles.css').read_text()
+
+    assert 'id="theme-toggle"' in html
+    assert 'sudokuTheme' in source
+    assert 'localStorage.setItem(THEME_STORAGE_KEY' in source
+    assert 'document.body.dataset.theme' in source
+    assert "body[data-theme='dark']" in css
