@@ -108,7 +108,53 @@ def test_check_solution_reports_cells_that_differ(client):
     response = client.post('/check', json={'board': board})
 
     assert response.status_code == 200
-    assert response.get_json() == {'incorrect': [[0, 0], [8, 8]]}
+    assert response.get_json() == {'incorrect': [[0, 0], [8, 8]], 'solved': False}
+
+
+def test_check_solution_reports_complete_board_as_solved(client):
+    solution = [[value for value in range(1, 10)] for _ in range(9)]
+    app_module.CURRENT.update(puzzle=solution, solution=solution)
+
+    response = client.post('/check', json={'board': solution})
+
+    assert response.status_code == 200
+    assert response.get_json() == {'incorrect': [], 'solved': True}
+
+
+def test_check_solution_reports_incomplete_board_as_unsolved(client):
+    solution = [[value for value in range(1, 10)] for _ in range(9)]
+    board = [row[:] for row in solution]
+    board[0][0] = 0
+    app_module.CURRENT.update(puzzle=solution, solution=solution)
+
+    response = client.post('/check', json={'board': board})
+
+    assert response.status_code == 200
+    assert response.get_json()['solved'] is False
+    assert response.get_json()['incorrect'] == [[0, 0]]
+
+
+def test_check_solution_reports_incorrect_board_as_unsolved(client):
+    solution = [
+        [5, 3, 4, 6, 7, 8, 9, 1, 2],
+        [6, 7, 2, 1, 9, 5, 3, 4, 8],
+        [1, 9, 8, 3, 4, 2, 5, 6, 7],
+        [8, 5, 9, 7, 6, 1, 4, 2, 3],
+        [4, 2, 6, 8, 5, 3, 7, 9, 1],
+        [7, 1, 3, 9, 2, 4, 8, 5, 6],
+        [9, 6, 1, 5, 3, 7, 2, 8, 4],
+        [2, 8, 7, 4, 1, 9, 6, 3, 5],
+        [3, 4, 5, 2, 8, 6, 1, 7, 9],
+    ]
+    board = [row[:] for row in solution]
+    board[8][8] = 1
+    app_module.CURRENT.update(puzzle=solution, solution=solution)
+
+    response = client.post('/check', json={'board': board})
+
+    assert response.status_code == 200
+    assert response.get_json()['solved'] is False
+    assert response.get_json()['incorrect'] == [[8, 8]]
 
 
 def test_check_solution_accepts_a_matching_board(client):
@@ -118,4 +164,4 @@ def test_check_solution_accepts_a_matching_board(client):
     response = client.post('/check', json={'board': solution})
 
     assert response.status_code == 200
-    assert response.get_json() == {'incorrect': []}
+    assert response.get_json() == {'incorrect': [], 'solved': True}

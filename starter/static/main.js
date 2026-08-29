@@ -99,13 +99,18 @@ async function checkSolution() {
       inp.className = 'sudoku-cell incorrect';
     }
   }
-  if (incorrect.size === 0) {
+  if (data.solved) {
     msg.style.color = '#388e3c';
     msg.innerText = 'Congratulations! You solved it!';
-  } else {
-    msg.style.color = '#d32f2f';
-    msg.innerText = 'Some cells are incorrect.';
+    return;
   }
+  if (incorrect.size === 0) {
+    msg.style.color = '#388e3c';
+    msg.innerText = '';
+    return;
+  }
+  msg.style.color = '#d32f2f';
+  msg.innerText = 'Some cells are incorrect.';
 }
 
 // Wire buttons

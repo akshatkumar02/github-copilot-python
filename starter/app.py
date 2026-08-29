@@ -46,7 +46,8 @@ def check_solution():
         for j in range(sudoku_logic.SIZE):
             if board[i][j] != solution[i][j]:
                 incorrect.append([i, j])
-    return jsonify({'incorrect': incorrect})
+    solved = all(cell != sudoku_logic.EMPTY for row in board for cell in row) and not incorrect
+    return jsonify({'incorrect': incorrect, 'solved': solved})
 
 if __name__ == '__main__':
     app.run(debug=True)
